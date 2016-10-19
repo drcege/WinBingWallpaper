@@ -1,0 +1,8 @@
+*.py[cod]
+setup.py
+WinBingWallpaper_con.py
+
+.vscode
+dist
+build
+
