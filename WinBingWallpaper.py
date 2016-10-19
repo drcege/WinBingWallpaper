@@ -3,6 +3,8 @@ from sys import argv
 import os
 from os.path import exists, join as pathjoin, isdir
 from os.path import dirname, abspath, realpath
+import tempfile
+import glob
 import sched, time
 import ConfigParser
 
@@ -11,7 +13,7 @@ import webutil
 import bingwallpaper
 import winsetter
 
-#REV  = '1.0.1'
+#REV  = '1.0.2'
 #LINK = 'https://github.com/gecece/WinBingWallpaper'
 
 _logger = log.getChild('main')
@@ -59,12 +61,21 @@ def download_wallpaper(config):
     mainlink = s.image_link()
     _logger.debug('photo link: %s', mainlink)
     filename = s.enddate() + '_' + mainlink.rpartition('_')[2]
-    outfile = pathjoin(abspath(config.get("Download", "output_folder")), filename)
+    
+    outdir = config.get("Download", "output_folder")
+    outfile = pathjoin(outdir, filename)
     _logger.debug('Output file: %s', outfile)
-
+    
     if exists(outfile):
         _logger.info('file has been downloaded before, just set wallpaper')
         return outfile
+        
+    if config.get('Download', 'collect') == '0':
+        for img in glob.glob(pathjoin(outdir, "*.jpg")):
+            try:
+                os.remove(img)
+            except os.error:
+                pass
 
     raw = save_a_picture(mainlink, outfile)
     if raw:
@@ -96,8 +107,16 @@ def main(daemon=None):
     config = ConfigParser.ConfigParser()
     config.read(conf_file)
 
-    # create output dir
-    prepare_output_dir(abspath(config.get("Download", "output_folder")))
+    # create output dir, if not blank
+    outdir = config.get("Download", "output_folder")
+    if outdir:
+        outdir = abspath(outdir)
+        config.set('Download', 'collect', '1')
+    else:
+        outdir = abspath(pathjoin(tempfile.gettempdir(), "WinBingWallpaper"))
+        config.set('Download', 'collect', '0')
+    config.set("Download", "output_folder", outdir)
+    prepare_output_dir(outdir)
 
     try:
         image_path = download_wallpaper(config)
