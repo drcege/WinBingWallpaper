@@ -2,7 +2,7 @@
 from sys import argv
 import os
 from os.path import exists, join as pathjoin, isdir
-from os.path import dirname, abspath, realpath
+from os.path import dirname, abspath, realpath, splitext
 import tempfile
 import glob
 import sched, time
@@ -60,7 +60,7 @@ def download_wallpaper(config):
 
     mainlink = s.image_link()
     _logger.debug('photo link: %s', mainlink)
-    filename = s.enddate() + '_' + mainlink.rpartition('_')[2]
+    filename = s.enddate() + splitext(mainlink)[1]
     
     outdir = config.get("Download", "output_folder")
     outfile = pathjoin(outdir, filename)
