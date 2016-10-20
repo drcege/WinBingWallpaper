@@ -14,7 +14,7 @@ import webutil
 import bingwallpaper
 import winsetter
 
-#REV  = '1.0.2'
+#REV  = '1.0.3'
 #LINK = 'https://github.com/gecece/WinBingWallpaper'
 
 _logger = log.getChild('main')
