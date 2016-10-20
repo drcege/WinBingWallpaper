@@ -100,14 +100,38 @@ def prepare_output_dir(d):
     else:
         _logger.critical('can not access output folder %s', d)
 
+def generate_conf_file(config):
+    config.add_section('Settings')
+    config.set('Settings', 'autostart', '1')
+    config.set('Settings', 'interval', '6')
+    config.add_section('Download')
+    config.set('Download', 'size_mode', 'manual')
+    config.set('Download', 'image_size', '1920x1080')
+    config.set('Download', 'country', 'cn')
+    config.set('Download', 'market', '')
+    config.set('Download', 'server', 'china')
+    config.set('Download', 'customserver', '')
+    config.set('Download', 'output_folder', 'D:\BingWallpapers')
+    config.add_section('Debug')
+    config.set('Debug', 'debug', '0')
+    
+    with open(conf_file, 'wb') as cf:
+        config.write(cf)
+    _logger.info('saved config to file %s', conf_file)
+    return config
+ 
 def main(daemon=None):
     _logger.info('daemon %s triggers an update', str(daemon))
     
     # reload config again in case the config file has been modified after
     #last shooting
-    config = ConfigParser.ConfigParser()
-    config.read(conf_file)
-
+    config = ConfigParser.ConfigParser(allow_no_value=True)
+    if not exists(conf_file):
+        _logger.info('config file is missing!')
+        config = generate_conf_file(config)
+    else:
+        config.read(conf_file)
+        
     # create output dir, if not blank
     outdir = config.get("Download", "output_folder")
     if outdir:
@@ -172,8 +196,13 @@ def set_debug_details(level):
     log.setDebugLevel(l)
 
 if __name__ == '__main__':
-    config = ConfigParser.ConfigParser()
-    config.read(conf_file)
+    config = ConfigParser.ConfigParser(allow_no_value=True)
+    if not exists(conf_file):
+        _logger.info('config file is missing!')
+        config = generate_conf_file(config)
+    else:
+        config.read(conf_file)
+    
     set_debug_details(config.get("Debug", "debug"))
 
     autostart = config.get("Settings", "autostart")
