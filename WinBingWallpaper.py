@@ -3,6 +3,7 @@ from sys import argv
 import os
 from os.path import exists, join as pathjoin, isdir
 from os.path import dirname, abspath, realpath, splitext
+import subprocess
 import tempfile
 import glob
 import sched, time
@@ -178,4 +179,7 @@ if __name__ == '__main__':
     autostart = config.get("Settings", "autostart")
     _logger.debug('autostart = %s', autostart)
     if autostart and autostart != '0':
+        CREATE_NO_WINDOW = 0x08000000
+        ret = subprocess.call("schtasks /create /tn WinBingWallpaper /sc onlogon /rl highest /f /tr " + abspath(realpath(argv[0])), creationflags=CREATE_NO_WINDOW)
+        _logger.debug('schtasks return %s', ret)
         bing_daemon()
